@@ -1,7 +1,6 @@
 function [closedImg] = generateClosedContour5(img, method)
 %Generate Closed contour 
 % Method: convex hull
-
   % Initialize output
   closedImg = zeros(size(img));
   
@@ -17,9 +16,9 @@ function [closedImg] = generateClosedContour5(img, method)
 %######
 %step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/1);
 %step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/2);
-step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/3);
+%step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/3);
 %step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/4);
-
+step_linha=round((max(Xcnt_int1)-min(Xcnt_int1))/10);
 
 %base=[min(Xcnt_int1) max(Xcnt_int1)];
 %base=[min(Xcnt_int1) min(Xcnt_int1)+step_linha+20;min(Xcnt_int1)+step_linha-20 max(Xcnt_int1)];
@@ -47,7 +46,7 @@ imag=zeros(size_img,size_img);
 
 
 
-r = round(mean(Xcnt_int));%coordenada de linha do centroide
+r = round(mean(Xcnt_int)) ;%coordenada de linha do centroide
 c = round(mean(Ycnt_int));%coordenada de coluna do centroide
 
 %Aqui, determinar coordenadas polares, ordenar pelo angulo e depois achar
@@ -85,26 +84,27 @@ c = round(mean(Ycnt_int));%coordenada de coluna do centroide
   oX=min(Xcnt)-extp/2;
   oY=min(Ycnt)-extp/2;
     
+   size_n_dX = dX+extp;
+   size_n_dY = dY+extp;
     
-    
-    if dX>=dY
-        size_n=dX+extp;
-    else size_n=dY+extp;
-    end
+%     if dX>=dY
+%         size_n=dX+extp;
+%     else size_n=dY+extp;
+%     end
+ 
 
-
-masks_contour = zeros(size_n,size_n);
-
+%masks_contour = zeros(size_n,size_n);
+masks_contour = zeros(size_n_dY,size_n_dX);
 
 XYZ=[(Xcnt-oX)' (Ycnt-oY)'];
 
-ind_1 = sub2ind(size(masks_contour),XYZ(:,1),XYZ(:,2));
-
+% ind_1 = sub2ind(size(masks_contour),XYZ(:,1),XYZ(:,2));
+ind_1 = sub2ind(size(masks_contour),XYZ(:,2),XYZ(:,1));
 masks_contour(ind_1) = 1;
         
    
-    masks_full = zeros(size_n,size_n);
-   
+   % masks_full = zeros(size_n,size_n);
+   masks_full = zeros(size_n_dY,size_n_dX);
    [~,n_dados]=size(Xcnt);
   
   tic 
@@ -118,7 +118,8 @@ masks_contour(ind_1) = 1;
  mulpt=30;
  
 for kk=1:1:n_dados-1;%1528:1:1730;%1528:1:1536;%1+mulpt*delta_n:1:delta_n+mulpt*delta_n;%1:1:n_dados-1;
-     masks_full_int = zeros(size_n,size_n);
+%      masks_full_int = zeros(size_n,size_n);
+    masks_full_int = zeros(size_n_dY,size_n_dX);
      XXX_1=[r-oX Xcnt(kk)-oX Xcnt(kk+1)-oX];
      YYY_1=[c-oY Ycnt(kk)-oY Ycnt(kk+1)-oY];
             
@@ -126,8 +127,8 @@ for kk=1:1:n_dados-1;%1528:1:1730;%1528:1:1536;%1+mulpt*delta_n:1:delta_n+mulpt*
      %coord_tri=[coord_tri;XXX_1(1) YYY_1(1) XXX_1(2) YYY_1(2) XXX_1(3) YYY_1(3)];
      coord_tri=[coord_tri;r c Xcnt(kk) Ycnt(kk) Xcnt(kk+1) Ycnt(kk+1)];
      
-     ind_2 = sub2ind(size(masks_full_int),XYZ_1(1:3,1),XYZ_1(1:3,2));
-    
+%      ind_2 = sub2ind(size(masks_full_int),XYZ_1(1:3,1),XYZ_1(1:3,2));
+     ind_2 = sub2ind(size(masks_full_int),XYZ_1(1:3,2),XYZ_1(1:3,1));
      dif_ind_2=[dif_ind_2 (ind_2(3)-ind_2(2))];
      dif_Xcnt= [dif_Xcnt (Xcnt(kk+1)-Xcnt(kk))];
      dif_Ycnt= [dif_Ycnt (Ycnt(kk+1)-Ycnt(kk))];
@@ -144,17 +145,24 @@ end
  %Gerar a imagem com o tamanho inicial
   
  
- [size_mask,~]=size(masks_full);
+ [size_maskY,size_maskX]=size(masks_full);
  closedImg_int=zeros(size_img,size_img);
+ size(closedImg);
  
- for countX=oX:oX+size_mask-1
+%  oX+size_mask-1
+%  oY+size_mask-1
+ for countX=oX:oX+size_maskX-1
     
-     for countY=oY:oY+size_mask-1
-         ind3=sub2ind(size(masks_full),countX-oX+1,countY-oY+1);
+     for countY=oY:oY+size_maskY-1
+         %ind3=sub2ind(size(masks_full),countX-oX+1,countY-oY+1);
+         ind3=sub2ind(size(masks_full),countY-oY+1,countX-oX+1);
+         %ind4=sub2ind(size(closedImg),countX,countY);
          ind4=sub2ind(size(closedImg),countX,countY);
          closedImg_int(ind4)=masks_full(ind3);
      end
+     
  end
+ 
      
     closedImg = closedImg+closedImg_int;
 end
@@ -166,8 +174,8 @@ closedImg(closedImg>0) = 1;
     %figure(4)
     %imshow([masks_contour masks_full])
     
-    %figure(5)
-    %imshow(closedImg)
+%     figure(5)
+%     imshow(closedImg)
     
     
  else 

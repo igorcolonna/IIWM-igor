@@ -23,7 +23,7 @@ function [array_output] = imReadArray(filename_array, root_path, flagBin, flagRG
     else if (ischar(root_path) && ischar(filename))
         I = imread(fullfile(root_path, filename));
     else
-        I = imread(fullfile(str2mat(root_path), str2mat(filename)));
+        I = imread(fullfile(str2mat(root_path), str2mat(filename)))
     end    
     N = size(I,1);
     M = size(I,2);

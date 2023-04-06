@@ -5,10 +5,10 @@ function [volTotal, arrayVolume] = computeVolumeFromMasks(masksComputed, distanc
 
     %  
  
-    %arrayVolume = sum(masks, [2 3])*ratioPixelMeter^2*distanceBetweenLayer;
-    
-    arrayVolume = sum(squeeze(masksComputed))*ratioPixelMeter^2*distanceBetweenLayer;
-        
+    arrayVolume = sum(masksComputed, [2 3])*ratioPixelMeter^2*distanceBetweenLayer;
+    %AreaRenata =  sum(masksComputed, [2 3])*ratioPixelMeter^2
+    %arrayVolume = sum(squeeze(masksComputed))*ratioPixelMeter^2*distanceBetweenLayer;
+         
     volTotal = sum(arrayVolume(:));
 end
 
