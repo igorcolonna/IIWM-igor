@@ -63,9 +63,9 @@ public class MatLab {
 			//MessageDialog tela = new MessageDialog(null, "Resultado da Segmentação", writer.toString());
 			
 			//////////////// IMPRESSAO NA TELA /////////////////////////
-			FileWriter myWriter = new FileWriter("C:\\Users\\Usuario\\Documents\\igor_imagens_teste\\logs\\log.txt");
-			myWriter.write(writer.toString());
-			myWriter.close();
+			// FileWriter myWriter = new FileWriter("C:\\Users\\Usuario\\Documents\\igor_imagens_teste\\logs\\log.txt");
+			// myWriter.write(writer.toString());
+			// myWriter.close();
 			new MessageDialog(null, "Resultado da Segmentação", writer.toString());
 			writer.getBuffer().setLength(0);
 			makeFinaltiff(model.getRoot());
