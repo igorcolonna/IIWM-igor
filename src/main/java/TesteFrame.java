@@ -43,6 +43,7 @@ import javax.swing.border.BevelBorder;
 import java.awt.Font;
 import java.awt.Dialog.ModalExclusionType;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
 
 public class TesteFrame extends JFrame implements AdjustmentListener, ActionListener, ItemListener{
 
@@ -101,10 +102,11 @@ public class TesteFrame extends JFrame implements AdjustmentListener, ActionList
 	public TesteFrame() {
 		
 		setModalExclusionType(ModalExclusionType.NO_EXCLUDE);
+		check.setBackground(new Color(255, 255, 0));
 
 		check.setModalityType(Dialog.DEFAULT_MODALITY_TYPE);
 		
-		filesList = getFilesInPathAsList("C:\\Users\\Usuario\\Documents\\igor_imagens_teste\\jpeg");
+		filesList = getFilesInPathAsList("C:\\Users\\igor_\\Downloads\\Teste_IIWM\\imagem");
 		
 		int quant = filesList.size();
 		quantidade = quant;
@@ -112,15 +114,20 @@ public class TesteFrame extends JFrame implements AdjustmentListener, ActionList
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(0, 255, 0));
+		
 		//contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		//setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(5, 0));
-		
+		//contentPane.setLayout(new BorderLayout(5, 0));
+
+		JScrollPane scrollPane = new JScrollPane();
+		//scrollPane.setMaximumSize(new Dimension(500,500));
+		//contentPane.add(scrollPane, BorderLayout.WEST);
 		
 		JPanel boxes = new JPanel();
 		boxes.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0)), new BevelBorder(BevelBorder.RAISED, null, null, null, null)));
-		contentPane.add(boxes, BorderLayout.WEST);
+		
 		boxes.setLayout(new GridLayout(0, 2, 3, 0));
 		
 		JPanel imagens = new JPanel();
@@ -180,7 +187,13 @@ public class TesteFrame extends JFrame implements AdjustmentListener, ActionList
 			Checkbox checkbox = new Checkbox(labels[i]);
 			boxes.add(checkbox);
 		}
+		
+		scrollPane.setViewportView(boxes);
+		contentPane.add(scrollPane, BorderLayout.WEST);
+		
 		check.add(contentPane);
+		
+		check.setSize(contentPane.getPreferredSize().width, contentPane.getPreferredSize().height);
 		check.showDialog();
 
 		
