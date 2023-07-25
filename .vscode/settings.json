@@ -1,3 +1,11 @@
 {
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "files.associations": {
+    "qvariant": "cpp",
+    "qapplication": "cpp"
+  },
+  "C_Cpp.default.includePath": [
+    "C:/Qt/6.5.0/mingw_64/include",
+    "${workspaceFolder}/**"
+  ]
 }
