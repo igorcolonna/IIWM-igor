@@ -23,8 +23,10 @@ for (i = 0; i < lengthOf(filelist); i++ ) {
         	//name = Dialog.getString();
         	if(i < 10){
         		name = "mask00" + i;
-        	}else {
+        	}else if (i < 100){
         		name = "mask0" + i;
+        	}else{
+        		name = "mask" + i;
         	}
         	
         	saveAs("Tiff", pasta[1] + File.separator + name);

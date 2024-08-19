@@ -19,151 +19,125 @@ import net.imagej.ImageJ;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.MessageDialog;
-import ij.process.StackConverter;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 
 public class MatLab {
-	
-	
-	static String path = new File("").getAbsolutePath();
-	
-	//static final String MATLAB_PATH = (path + "\\plugins\\IIWM\\matlab");
-	static final String MATLAB_PATH = (path + "\\IIWM\\matlab");
-	static final String MACRO_PATH = (path + "\\IIWM\\macros");
-	
-	static StringWriter writer = new StringWriter();
-	static StringWriter writer2 = new StringWriter();
-	static ImageJ ij;
-	
-	public static void callMatlab(SegmentationUSImageID model, ImageJ ij)  {
-		
-		try {
-			MatlabEngine ml = MatlabEngine.startMatlab();
-			
-			ml.eval("cd '" + MATLAB_PATH + "'");
-			Object[] variables = {
-					model.getOcf(),
-					model.getRpm(),
-					model.getDbl(),
-					getFilesInPath(model.getRootImages()),
-					(model.getRootImages().toCharArray()),
-					getFilesInPath(model.getRootMask()),
-					(model.getRootMask().toCharArray()),
-					model.getTypeFilter(),
-					model.getLevelProcessing(),
-					model.getStringTumorLayer(),
-					model.isIdxLayer(),
-					model.isSave(),
-					model.isActiveContour(),
-					(model.getRoot().toCharArray())
-			};
-			
-			ml.feval("segmentationUSImagesIG", writer, writer2, variables);
-			//MessageDialog tela = new MessageDialog(null, "Resultado da Segmentação", writer.toString());
-			
-			//////////////// IMPRESSAO NA TELA /////////////////////////
-			// FileWriter myWriter = new FileWriter("C:\\Users\\Usuario\\Documents\\igor_imagens_teste\\logs\\log.txt");
-			// myWriter.write(writer.toString());
-			// myWriter.close();
-			new MessageDialog(null, "Resultado da Segmentação", writer.toString());
-			writer.getBuffer().setLength(0);
-			makeFinaltiff(model.getRoot());
-			openImage(model.getRoot() + "\\final.tif", model.getRpm(), model.getDbl());
-			
-		} 
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	public static void sumImages( char[] filePath, char[][] masknames, char[] maskPath, char[] savePath, double distance)  {
-		System.out.println(distance);
-		try {
-			MatlabEngine ml = MatlabEngine.startMatlab();
 
-			ml.eval("cd '" + MATLAB_PATH + "'");
-			Object[] variables = { filePath, masknames, maskPath, savePath, distance };
-			
-			ml.feval("sumImages", writer, writer2, variables);
-			new MessageDialog(null, "Resultado da Soma de Imagens", writer.toString());
-			
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	private static void openImage(String path, double unitXY, double unitZ) {
-		ImagePlus image = IJ.openImage(path);
-		unitXY = unitXY * 1000;
-		unitZ = unitZ * 1000;
-		System.out.println(path);
-		System.out.println(unitXY);
-		System.out.println(unitZ);
-		
-		image.getCalibration().setUnit("mm");
-		image.getCalibration().pixelWidth = image.getCalibration().pixelHeight = unitXY;
-		image.getCalibration().pixelDepth = unitZ;
-		
-		Image3DUniverse univ = new Image3DUniverse();
-		
-		
-		//Content c = univ.addMesh(image);
-		Content c = univ.addVoltex(image);
-			
-		//sleep(5);
-		univ.getCanvas();
-	    
-		//c.setTransparency((float) 0.4);
-		univ.show();
-	}
+    static String path = new File("").getAbsolutePath();
+    static final String MATLAB_PATH = (path + "\\IIWM\\matlab");
+    static final String MACRO_PATH = (path + "\\IIWM\\macros");
     
-//	private static void sleep(int sec) {
-//	    try {
-//			Thread.sleep(sec * 1000);
-//	    } catch(InterruptedException e) {
-//			System.out.println(e.getMessage());
-//	    }
-//  }
-	
-	public static void makeFinaltiff(String path) {
-		System.out.println(MACRO_PATH + "\\make3Dimage.ijm");
-		IJ.runMacroFile(MACRO_PATH + "\\make3Dimage.ijm", path);
-	}
-	
-	public static ByteBuffer convertImage(BufferedImage image) throws IOException
-	{     
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write( image, "TIFF", baos );
-		
-		return ByteBuffer.wrap(baos.toByteArray());
-		
-	}
+    static StringWriter writer = new StringWriter();
+    static StringWriter writer2 = new StringWriter();
+    static ImageJ ij;
 
-	
-	private static char[][] getFilesInPath(String path) {
-		ArrayList<char[]> _files = new ArrayList<char[]>();
-	
-		File folder = new File(path);
-		File[] files = folder.listFiles();
+    // Método principal para chamar o script MATLAB com os parâmetros configurados
+    public static void callMatlab(SegmentationUSImageID model, ImageJ ij) {
+        try {
+            MatlabEngine ml = MatlabEngine.startMatlab();  // Inicia uma sessão MATLAB
 
-		if (files != null) {
-			for (File file : files) {
-				 if (file != null) {
-					 _files.add((file.getName().toCharArray()));
-				}
-			}
-		}
+            // Define o diretório de trabalho no MATLAB
+            ml.eval("cd '" + MATLAB_PATH + "'");
+            
+            // Variáveis a serem passadas para o MATLAB
+            Object[] variables = {
+                model.getOcf(),
+                model.getRpm(),
+                model.getDbl(),
+                getFilesInPath(model.getRootImages()),
+                (model.getRootImages().toCharArray()),
+                getFilesInPath(model.getRootMask()),
+                (model.getRootMask().toCharArray()),
+                model.getTypeFilter(),
+                model.getLevelProcessing(),
+                model.getStringTumorLayer(),
+                model.isIdxLayer(),
+                model.isSave(),
+                model.isActiveContour(),
+                (model.getRoot().toCharArray())
+            };
+            
+            // Executa a função MATLAB para segmentação de imagens
+            ml.feval("segmentationUSImagesIG", writer, writer2, variables);
+            
+            // Exibe uma caixa de diálogo com o resultado da segmentação
+            new MessageDialog(null, "Resultado da Segmentação", writer.toString());
+            
+            // Limpa o buffer do StringWriter
+            writer.getBuffer().setLength(0);
+            
+            // Gera o arquivo final TIFF e o abre
+            makeFinaltiff(model.getRoot());
+            openImage(model.getRoot() + "\\final.tif", model.getRpm(), model.getDbl());
+            
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 
-		return _files.toArray(new char[0][0]);
-	}
+    // Método para somar imagens usando um script MATLAB
+    public static void sumImages(char[] filePath, char[][] masknames, char[] maskPath, char[] savePath, double distance) {
+        try {
+            MatlabEngine ml = MatlabEngine.startMatlab();  // Inicia uma sessão MATLAB
 
+            ml.eval("cd '" + MATLAB_PATH + "'");
+            Object[] variables = { filePath, masknames, maskPath, savePath, distance };
+            
+            // Executa a função MATLAB para somar as imagens
+            ml.feval("sumImages", writer, writer2, variables);
+            new MessageDialog(null, "Resultado da Soma de Imagens", writer.toString());
+            
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Método para abrir uma imagem no ImageJ e configurar a calibração espacial
+    private static void openImage(String path, double unitXY, double unitZ) {
+        ImagePlus image = IJ.openImage(path);
+        unitXY = unitXY * 1000;
+        unitZ = unitZ * 1000;
+
+        image.getCalibration().setUnit("mm");
+        image.getCalibration().pixelWidth = image.getCalibration().pixelHeight = unitXY;
+        image.getCalibration().pixelDepth = unitZ;
+        
+        // Abre a imagem em uma janela 3D no ImageJ
+        Image3DUniverse univ = new Image3DUniverse();
+        Content c = univ.addVoltex(image);  // Adiciona a imagem como volume
+
+        univ.getCanvas();
+        univ.show();  // Mostra a janela 3D
+    }
+
+    // Método para criar o arquivo final TIFF usando um macro do ImageJ
+    public static void makeFinaltiff(String path) {
+        IJ.runMacroFile(MACRO_PATH + "\\make3Dimage.ijm", path);
+    }
+
+    // Método para converter uma imagem BufferedImage em ByteBuffer
+    public static ByteBuffer convertImage(BufferedImage image) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "TIFF", baos);
+        return ByteBuffer.wrap(baos.toByteArray());
+    }
+
+    // Método para obter os arquivos de um diretório como uma matriz de char
+    private static char[][] getFilesInPath(String path) {
+        ArrayList<char[]> _files = new ArrayList<>();
+
+        File folder = new File(path);
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file != null) {
+                    _files.add((file.getName().toCharArray()));
+                }
+            }
+        }
+
+        return _files.toArray(new char[0][0]);
+    }
 }

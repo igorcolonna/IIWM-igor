@@ -1,11 +1,9 @@
-% Projeto final -  SegmentaÁ„o de colon de camundongos
+% Projeto final -  Segmenta√ß√£o de colon de camundongos
 % 
-% Author: Igor Soares Colonna - igorcolonna@poli.ufrj.br
-%         Renata Porciuncula Baptista - r.baptista@poli.ufrj.br
+% Author: Renata Porciuncula Baptista - r.baptista@poli.ufrj.br
 % Orientador: Joao Carlos Machado - jcm@peb.ufrj.br
 % Date: 16 August 2019, v1.1 
 %        07 September 2019, v2.0
-%          16 August 2024, v3.0
 
 function [masksActivated,...
          volTotalEstimated,...
@@ -28,9 +26,9 @@ function [masksActivated,...
     % Briefing about the code
     fprintf('--------------------------------------------------------\n\n');
     fprintf('               SEGMENTATION US SCRIPT                   \n\n');
-    fprintf('Author: Igor Soares Colonna, Renata Baptista\n')   ;
-    fprintf('Email: igorcolonna@poli.ufrj.br, r.baptista@poli.ufrj.br\n');
-    fprintf('v3.0 - 16/08/2024 \n');
+    fprintf('Author: Renata Baptista\n');
+    fprintf('Email: r.baptista@poli.ufrj.br\n');
+    fprintf('v3 - 22/1/2019 \n');
     fprintf('--------------------------------------------------------\n\n');
 
     PATH = which('segmentationUSImagesIG');
@@ -63,6 +61,19 @@ function [masksActivated,...
     imagesNoTreatment = imReadArrayNoTreatment(rootImages);
     masks = 255*imReadArray(GT_filename, rootMask, true);
     
+%     imageFiles = dir(rootImages);
+%     nfiles = length(imageFiles);
+%     
+%     for ii=1:nfiles
+%         currentfilename = imageFiles(ii).name;
+%         currentIMG = imread(currentfilename);
+%         images{ii} = currentIMG;
+%     end
+    
+%     figure(1)
+%     maskteste1=squeeze(masks(1,:,:));
+%     imshow (maskteste1)
+    
     idxMasksToNotCompute = getIndexFromName(images_filename,GT_filename);
     steps_vector = diff(idxMasksToNotCompute);
     idxMaskToCompute = setdiff(1:size(images_filename,1), idxMasksToNotCompute);
@@ -90,6 +101,9 @@ function [masksActivated,...
     %% Interpolating
     % first, getting contours
     masksGrad = imGradientArray(masks);
+    %fprintf('idxMaskToNotCompute: %d\n', idxMasksToNotCompute);
+    %fprintf('steps_vector: %d\n', steps_vector);
+    %fprintf('\nInterpolating images between well defined masks:\n')
     %tic;
     % coordinates of non null
     cum_step = 0;
@@ -115,28 +129,43 @@ function [masksActivated,...
             
             imgTemp = imagesNoTreatment{idxMasksToNotCompute(iMask)};
             
+            %maskTemp = masks(iMask,:,:);
             maskTemp = squeeze(masks(iMask,:,:));
-            maskTemp = uint8(maskTemp);              
+            maskTemp = uint8(maskTemp);
+            %imwrite(maskTemp,'maskTemp.tif')
             
             bw = bwperim(maskTemp,8);
             
             se = strel('line',10,0);
             bw = imdilate(bw,se);
+%             figure(1)
+%             imshow(maskTemp)
+            %imgTemp = squeeze(imgTemp(:,:,1));
+            %figure(2)
+            %imshow(imgTemp)
+            %maskTemp = squeeze(maskTemp(:,:,1));
         
             filtro = imgTemp.*(maskTemp/255);
+            %imwrite(filtro,'filtro.tif')
+            %filtro = times(imgTemp, maskTemp/255);
             imgTemp = imgTemp - filtro;
+            %imwrite(imgTemp, 'imgTemp-filtro.tif')
             
             zeropict = zeros(size(filtro),class(filtro));
             redpict = cat(3,filtro,zeropict, zeropict);
             redpict2 = cat(3,maskTemp.*255,zeropict,zeropict).* 0.3;
             boundpict = cat(3,bw.*255,zeropict,zeropict);
             
-            %result = imgTemp+redpict+redpict2+boundpict;                   %Salvar com uma borda maior (melhor vizualizaÁ„o no 3D)
-            result = imgTemp+redpict+redpict2;                              %Salvar sem uma borda maior (melhor fidelidade da geometria)
-            imwrite(result,filename);      
+            %result = imgTemp+redpict+redpict2+boundpict;
+            result = imgTemp+redpict+redpict2;
+            imwrite(result,filename);
+            %imwrite(result,filename);
+            
+            %imwrite(squeeze(masks(iMask,:,:)),filename);
           
             %Lugar aonde fica os codigos do matlab
             cd(PATH)
+            %cd('C:\Users\Usuario\Downloads\fiji-win64\Fiji.app\IIWM\matlab')
         end
         
         
@@ -168,16 +197,17 @@ function [masksActivated,...
         filename=strcat(aux1,aux2,aux3);
         
         imgTemp = imagesNoTreatment{idxMasksToNotCompute(iMask+1)};
-
+        %maskTemp = masks(iMask+1,:,:);
         maskTemp = squeeze(masks(iMask+1,:,:));
         maskTemp = uint8(maskTemp);
         
         bw = bwperim(maskTemp,8);
         se = strel('line',10,0);
         bw = imdilate(bw,se);
-
+        %imgTemp = squeeze(imgTemp(:,:,1));
+        %maskTemp = squeeze(maskTemp(:,:,1));
         filtro = imgTemp.*(maskTemp/255);
-
+        %filtro = times(imgTemp, maskTemp/255);
         imgTemp = imgTemp - filtro;
             
         zeropict = zeros(size(filtro),class(filtro));
@@ -185,10 +215,12 @@ function [masksActivated,...
         redpict2 = cat(3,maskTemp.*255,zeropict,zeropict).* 0.3;
         boundpict = cat(3,bw.*255,zeropict,zeropict);
         
-        %result = imgTemp+redpict+redpict2+boundpict;                       %Salvar com uma borda maior (melhor vizualizaÁ„o no 3D)
-        result = imgTemp+redpict+redpict2;                                  %Salvar sem uma borda maior (melhor fidelidade da geometria)
-
+        %result = imgTemp+redpict+redpict2+boundpict;
+        result = imgTemp+redpict+redpict2;
+        %imwrite(result,filename);
         imwrite(result,filename);
+        
+        %imwrite(squeeze(masks(iMask+1,:,:)),filename);
           
         %Lugar aonde fica os codigos do matlab
         cd(PATH)
@@ -207,22 +239,36 @@ function [masksActivated,...
         img = squeeze(masksInterpolated(idx,:,:));
         %closedContour(idx,:,:) = generateClosedContour(img, optionClosedFunction);
         %MODIFICADO EM 10/03/2021s
-        %imshow(img);
+        imshow(img);
         closedContour(idx,:,:) = generateClosedContour5(img, optionClosedFunction);
-        
-        % DEBUG - para vizualizar como esta o contorno prÈ contorno ativo, use a linha abaixo:
-        % imshow(squeeze(closedContour(idx,:,:)),[])
-        
+         %figure(1)
+         %imshow(squeeze(closedContour(idx,:,:)),[])
+         cd('C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\all_masks_teste_CF')
+         imwrite(squeeze(closedContour(idx,:,:)), filename);
         if activeContour == true
+%             size(imagesNoTreatment{idxMaskToCompute(count_mask)})
+%             size(squeeze(closedContour(idx,:,:)))
             closedContour(idx,:,:) = activecontour(imagesNoTreatment{idxMaskToCompute(count_mask)}, squeeze(closedContour(idx,:,:)), n_iterations,'edge','ContractionBias',0);
-            
-        % DEBUG - para vizualizar como esta o contorno pÛs contorno ativo, use a linha abaixo:
-        % imshow(squeeze(closedContour(idx,:,:)),[])
-            
+            cd('C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\all_masks_teste_CA')
+            imwrite(squeeze(closedContour(idx,:,:)), filename);
+            %             bw = bwperim(squeeze(closedContour(idx,:,:)),8);
+%             se = strel('line',10,0);
+%             bw = imdilate(bw,se);
+            %Bounds = visboundaries(squeeze(closedContour(idx,:,:)),'Color','g');
+            %bw = activecontour(imagesNoTreatment(idxMaskToCompute(count_mask - 1)), closedContour(idx,:,:), n_iterations);
+%             figure(2)  
+%             imshow(squeeze(closedContour(idx,:,:)),[])
+            cd(PATH);
         end
         
+        %imshow(img)
+        %size(closedContour(idx,:,:))
+        
+          %alterado em 5/03/2021
+      % cd ('C:\Users\DELL\Desktop\mask')
       if save_option == true
           cd (root)
+          %cd ('D:\Documentos\Igor Colonna\Teste matlab\Arquivos imagens\Salvar mascaras')
           aux1='Mask';
           aux3='.tif';
           aux2=sprintf('%04d',[idxMaskToCompute(count_mask)-1]);
@@ -234,11 +280,23 @@ function [masksActivated,...
           bw = bwperim(squeeze(closedContour(idx,:,:)),8);
           se = strel('line',10,0);
           bw = imdilate(bw,se);
+%           figure(idx)
+%           imshow(maskTemp)
+%           figure(5)
+%           imshow(imgTemp)
+          %maskTemp = squeeze(closedContour(idx,:,:));
           
+          %imgTemp = squeeze(imgTemp(:,:,1));
+          %figure(6)
+          %imshow(imgTemp)
+          %maskTemp = squeeze(maskTemp(:,:,1));
           maskTemp = uint8(maskTemp);
+          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+          %figure(6)
+          %imshow(maskTemp)
           
           filtro = imgTemp.*(maskTemp);
-          
+          %filtro = times(imgTemp, maskTemp/255);
           imgTemp = imgTemp - filtro;
             
           zeropict = zeros(size(filtro),class(filtro));
@@ -246,18 +304,30 @@ function [masksActivated,...
           redpict = cat(3,filtro,zeropict, zeropict);
           redpict2 = cat(3,maskTemp.*255,zeropict,zeropict).* 0.3;
           boundpict = cat(3,bw.*255,zeropict,zeropict);
-          
-          %result = imgTemp+redpict+redpict2+boundpict;                     %Salvar com uma borda maior (melhor vizualizaÁ„o no 3D)
-          result = imgTemp+redpict+redpict2;                                %Salvar sem uma borda maior (melhor fidelidade da geometria)
+          %figure(4)
+          %imshow(imgTemp)
+          %imwrite(imgTemp, filename);
+          %result = imgTemp+redpict+redpict2+boundpict;
+          result = imgTemp+redpict+redpict2;
+%           figure(5)
+%           imshow(result)
           imwrite(result,filename);
           
+          %imwrite(result,filename);
+          
+          %imwrite(squeeze(closedContour(idx,:,:)),filename);
           count_mask=count_mask+1;
+          %cd('C:\Rodrigo\Doutorado\C√≥digos\codigo_modi')
+          %cd('D:\Documentos\Igor Colonna\Teste matlab')
           
           %Lugar aonde fica os codigos do matlab
           cd(PATH)
+          %cd('C:\Users\Usuario\Downloads\fiji-win64\Fiji.app\IIWM\matlab')
+          %cd('C:\Users\Usuario\Downloads\Programas para imagem_3D-20220215T161323Z-001\Programas para imagem_3D\ImageJ.app\plugins\IIWM\matlab')
+          %cd('C:\Users\Usuario\Downloads\Programas para imagem_3D-20220215T161323Z-001\Programas para imagem_3D\ImageJ.app\matlab')
       end
       
-   %#################### FIM DA PARTE PARA SALVAR M¡SCARAS
+   %#################### FIM DA PARTE PARA SALVAR M√ÅSCARAS
    
     end
     %toc;
@@ -278,14 +348,17 @@ function [masksActivated,...
     fprintf('\nComputing volumes:\n')
     
     masksComputed = zeros(size(idxMaskToCompute,2), size(image,1), size(image,2));
-    %imshow(masksComputed) %1-03-2021 mostrar as m·scaras 
+    %imshow(masksComputed) %1-03-2021 mostrar as m√°scaras 
 
 count = 1;
     for idx = idxMaskToCompute
         masksComputed(count,:,:) = closedContour(idx,:,:);
         count = count+ 1;
     end
-
+    
+    %sum(sum(closedContour(idx,:,:)))
+%     figure(3)
+%     imshow(squeeze(closedContour(idx,:,:)))
     
     [volTotalEstimated, arrayVolEstimated] = computeVolumeFromMasks(masksComputed,...
                                                                     distanceBetweenLayer,...
@@ -349,6 +422,7 @@ volumeTotal = NewComputeVolumeFromMasks(dados_full, distanceBetweenLayer);
 
 fprintf('\t Volume total(new method): %.4f mm3 \n', volumeTotal);
 
+%disp(dados_full)
    
     toc;
 end

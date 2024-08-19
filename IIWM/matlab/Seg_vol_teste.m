@@ -10,12 +10,13 @@ optionClosedFunction='hull';
 ratioPixelMeter=0.000006;
 distanceBetweenLayer=0.000025;
 
-IMG = dir('C:\Users\Usuario\Documents\igor_imagens_teste\testeTumor\imagens\*.jpg');
+IMG = dir('C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\segmento_tumor1\*.jpg');
 filename_array = vertcat(IMG.name);
-MASK = dir('C:\Users\Usuario\Documents\igor_imagens_teste\testeTumor\mask\*.tif');
+MASK = dir('C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\mask_4_prof\*.tif');
+
 GT_filename = vertcat(MASK.name);
-rootImages = 'C:\Users\Usuario\Documents\igor_imagens_teste\testeTumor\imagens';
-rootMask='C:\Users\Usuario\Documents\igor_imagens_teste\testeTumor\mask';
+rootImages = 'C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\segmento_tumor1';
+rootMask='C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\mask_4_prof';
 % filename_array=['teste0000.tif';'teste0001.tif';'teste0002.tif';'teste0003.tif';'teste0004.tif';'teste0005.tif';'teste0006.tif';'teste0007.tif';'teste0008.tif';'teste0009.tif';
 %     'teste0010.tif';'teste0011.tif';'teste0012.tif';'teste0013.tif';'teste0014.tif';'teste0015.tif';'teste0016.tif';'teste0017.tif';'teste0018.tif';'teste0019.tif';'teste0020.tif';
 %     'teste0021.tif';'teste0022.tif';'teste0023.tif';'teste0024.tif'];
@@ -53,12 +54,12 @@ IDX_LAYER='void';
 save_option= true;
 activeContour = true;
 % root='C:\Users\Usuario\Documents\igor_imagens_teste\teste_mts_testes\resultado';
-root='C:\Users\Usuario\Documents\igor_imagens_teste\testeTumor\result';
+root='C:\Users\Usuario\Documents\Vanessa\HPG1_Experimento1_01.02.2024\result_teste';
 %Fim dos dados iniciais
 
 [masksActivated,...
     volTotalEstimated,...
-    volMasks] = segmentationUSImagesIG(optionClosedFunction, ...
+    volMasks] = segmentationUSImagesIG_Testes(optionClosedFunction, ...
                                         ratioPixelMeter, distanceBetweenLayer,...
                                         filename_array, rootImages, ...
                                         GT_filename, rootMask,...
